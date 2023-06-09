@@ -20,23 +20,20 @@ def convert_to_json_patches(input, formData={}):
                         expr = item.pop("expr")
                         item["value"] = calculate_price(expr, formData, False)
             value = new_list
-            return value
-        else:
-            return value
+        return value
     if input["type"] == "walk":
-        patches = []
-        patches.append([{"op": "add", "path": "/CFF_PATCHED", "value": False}])
+        patches = [[{"op": "add", "path": "/CFF_PATCHED", "value": False}]]
         items = input["items"]
         pairs_of_items = zip(items, items[1:])
-        for (first, second) in pairs_of_items:
-            patches.append(
-                [
-                    {"op": "test", "path": input["path"], "value": first},
-                    {"op": "test", "path": "/CFF_PATCHED", "value": False},
-                    {"op": "replace", "path": input["path"], "value": second},
-                    {"op": "replace", "path": "/CFF_PATCHED", "value": True},
-                ]
-            )
+        patches.extend(
+            [
+                {"op": "test", "path": input["path"], "value": first},
+                {"op": "test", "path": "/CFF_PATCHED", "value": False},
+                {"op": "replace", "path": input["path"], "value": second},
+                {"op": "replace", "path": "/CFF_PATCHED", "value": True},
+            ]
+            for first, second in pairs_of_items
+        )
         patches.append([{"op": "remove", "path": "/CFF_PATCHED"}])
         return patches
 
@@ -55,18 +52,18 @@ def unwind(input, data):
         value = input.pop("value")
         for idx, item in enumerate(value):
             if "path" in value[idx]:
-                for i in range(0, num_elements):
-                    results.append(
-                        dict(
-                            input,
-                            value=[
-                                dict(
-                                    value[idx],
-                                    path=f"{unwind_json_pointer}/{i}{value[idx]['path']}",
-                                )
-                            ],
-                        )
+                results.extend(
+                    dict(
+                        input,
+                        value=[
+                            dict(
+                                value[idx],
+                                path=f"{unwind_json_pointer}/{i}{value[idx]['path']}",
+                            )
+                        ],
                     )
+                    for i in range(0, num_elements)
+                )
         return results  # Flatten list of lists
 
 

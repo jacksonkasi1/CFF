@@ -53,8 +53,6 @@ def do_stuff():
         _, user = r.user.split("cm:cognitoUserPool:")
         if user not in subs:
             print("NO!!! ", user, serialize_model(r))
-        # print("OK")
-        pass
     # return emails
 
 

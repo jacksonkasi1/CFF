@@ -56,7 +56,7 @@ def response_ccavenue_response_handler(responseId):
             paramDict,
         )
         # todo: redirect to another error page.
-    elif paramDict["order_status"] == "Success":
+    else:
         order_id = paramDict["order_id"]
         if any(
             item.status == "SUCCESS"

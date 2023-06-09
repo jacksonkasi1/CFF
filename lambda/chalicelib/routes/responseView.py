@@ -13,9 +13,7 @@ def response_view(responseId):
         response = Response.objects.get({"_id": ObjectId(responseId)})
         if response.user and response.user.id == app.get_current_user_id():
             pass  # user owns this response
-        elif response.form.formOptions.responseCanViewByLink:
-            pass  # can view response by link
-        else:
+        elif not response.form.formOptions.responseCanViewByLink:
             app.check_permissions(response.form, ["Responses_View"])
         return {"success": True, "res": serialize_model(response)}
     except DoesNotExist:

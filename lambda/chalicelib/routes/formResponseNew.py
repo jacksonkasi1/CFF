@@ -93,9 +93,7 @@ def form_response_new(formId):
     ):
         response_data = patch_predicate(response_data, postprocess["patches"])
     response_metadata = {}
-    if newResponse:
-        pass
-    else:
+    if not newResponse:
         existing_response = Response.objects.get({"_id": responseId})
         response_metadata["date_created"] = datetime_isoformat(
             existing_response.date_created
@@ -224,7 +222,7 @@ def form_response_new(formId):
             form=form,
             id=responseId,
             date_created=datetime.datetime.now(),
-            modify_link=modify_link + "?responseId=" + str(responseId)
+            modify_link=f"{modify_link}?responseId={str(responseId)}"
             if modify_link
             else "",
             counter=counter_value,

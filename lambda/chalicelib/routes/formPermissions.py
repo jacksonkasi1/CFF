@@ -70,7 +70,7 @@ def get_user_by_email(email):
         UserPoolId=USER_POOL_ID,
         AttributesToGet=["sub"],
         Limit=1,
-        Filter='email ^= "{}"'.format(email),
+        Filter=f'email ^= "{email}"',
     )
     if len(response["Users"]) == 0:
         return None
@@ -100,7 +100,7 @@ def _model_edit_permissions(model, model_name):
         app.check_permissions(model, "owner")
     for i, v in permissions.items():
         if i not in POSSIBLE_PERMISSIONS[model_name]:
-            raise Exception("Permissions {} is an invalid permission.".format(i))
+            raise Exception(f"Permissions {i} is an invalid permission.")
         if type(v) is not bool:
             raise Exception(
                 "Permission {} not formatted correctly; each value should be a boolean.".format(
@@ -114,7 +114,7 @@ def _model_edit_permissions(model, model_name):
         userId = get_user_by_email(email.strip())
         if not userId:
             raise Exception("User not found for specified email.")
-        userId = "cm:cognitoUserPool:" + userId
+        userId = f"cm:cognitoUserPool:{userId}"
     if permissions == {} and userId in model.cff_permissions:
         del model.cff_permissions[userId]
     else:

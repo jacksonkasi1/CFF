@@ -409,9 +409,7 @@ FORM_V2_SUBMIT_RESP = {
 
 
 def load_file(fileName):
-    with open(
-        os.path.dirname(os.path.realpath(__file__)) + "/files/" + fileName
-    ) as file:
+    with open(f"{os.path.dirname(os.path.realpath(__file__))}/files/{fileName}") as file:
         return json.load(file)
 
 

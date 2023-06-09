@@ -2,6 +2,7 @@
 pipenv run python chalicelib/util/jwt.py
 From https://github.com/awslabs/aws-support-tools/blob/master/Cognito/decode-verify-jwt/decode-verify-jwt.py
 """
+
 import requests
 import json
 import time
@@ -12,9 +13,7 @@ from jose.utils import base64url_decode
 
 region = "us-east-1"
 userpool_id = os.getenv("USER_POOL_ID")
-keys_url = "https://cognito-idp.{}.amazonaws.com/{}/.well-known/jwks.json".format(
-    region, userpool_id
-)
+keys_url = f"https://cognito-idp.{region}.amazonaws.com/{userpool_id}/.well-known/jwks.json"
 # instead of re-downloading the public keys every time
 # we download them only on cold start
 # https://aws.amazon.com/blogs/compute/container-reuse-in-lambda/
@@ -33,12 +32,7 @@ def get_claims(
         #   print(f"JWT could not be decoded properly: {token}")
         return False
     kid = headers["kid"]
-    # search for the kid in the downloaded public keys
-    key_index = -1
-    for i in range(len(keys)):
-        if kid == keys[i]["kid"]:
-            key_index = i
-            break
+    key_index = next((i for i in range(len(keys)) if kid == keys[i]["kid"]), -1)
     if key_index == -1:
         print("Public key not found in jwks.json")
         return False

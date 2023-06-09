@@ -99,11 +99,10 @@ def send_email_receipt(response, formOptions, email_template_id=None):
     # Use the confirmationEmailInfo corresponding to email_template_id, falling back to formOptions.confirmationEmailInfo if none specified / found
     confirmationEmailInfo = None
     if email_template_id and formOptions.confirmationEmailTemplates:
-        matchingConfirmationEmailTemplate = find(
+        if matchingConfirmationEmailTemplate := find(
             formOptions.confirmationEmailTemplates,
             lambda x: x.get("id") == email_template_id,
-        )
-        if matchingConfirmationEmailTemplate:
+        ):
             confirmationEmailInfo = matchingConfirmationEmailTemplate.get(
                 "confirmationEmailInfo"
             )
@@ -126,7 +125,7 @@ def mark_error_payment(response, message, method_name, full_value):
         )
     )
     response.save()
-    raise Exception("IPN ERROR: " + message)
+    raise Exception(f"IPN ERROR: {message}")
 
 
 def parse_ipn_body(ipn_body):
@@ -183,7 +182,7 @@ def response_ipn_listener(responseId):
         "host": "www.paypal.com",
     }
     r = requests.post(
-        VERIFY_URL + "?cmd=_notify-validate",
+        f"{VERIFY_URL}?cmd=_notify-validate",
         data=ipn_body,
         headers=headers,
         verify=True,

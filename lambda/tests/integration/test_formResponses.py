@@ -20,7 +20,7 @@ class FormResponses(BaseTestCase):
         super(FormResponses, self).setUp()
         self.formId = self.create_form()
         form = Form.objects.get({"_id": ObjectId(self.formId)})
-        to_create = [Response(form=form, paid=True) for i in range(0, 50)]
+        to_create = [Response(form=form, paid=True) for _ in range(0, 50)]
         Response.objects.bulk_create(to_create)
 
     def test_form_responses_list(self):

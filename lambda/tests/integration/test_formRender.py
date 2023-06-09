@@ -25,9 +25,14 @@ class FormRender(BaseTestCase):
         self.assertEqual(response["statusCode"], 200, response)
         body = json.loads(response["body"])
         self.assertEqual(
-            set(
-                ("_id", "name", "schema", "uiSchema", "formOptions", "cff_permissions")
-            ),
+            {
+                "_id",
+                "name",
+                "schema",
+                "uiSchema",
+                "formOptions",
+                "cff_permissions",
+            },
             set(body["res"].keys()),
         )
         self.assertEqual(body["res"]["_id"]["$oid"], self.formId)
@@ -64,22 +69,20 @@ class FormRender(BaseTestCase):
         body = json.loads(response["body"])
 
         self.assertEqual(
-            set(
-                (
-                    "counter",
-                    "_id",
-                    "paid",
-                    "date_created",
-                    "date_modified",
-                    "form",
-                    "user",
-                    "amount_paid",
-                    "paymentInfo",
-                    "value",
-                    "modify_link",
-                    "amount_owed_cents",
-                )
-            ),
+            {
+                "counter",
+                "_id",
+                "paid",
+                "date_created",
+                "date_modified",
+                "form",
+                "user",
+                "amount_paid",
+                "paymentInfo",
+                "value",
+                "modify_link",
+                "amount_owed_cents",
+            },
             set(body["res"].keys()),
         )
         self.assertEqual(body["res"]["form"]["$oid"], self.formId)

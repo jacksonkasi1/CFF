@@ -20,7 +20,6 @@ pool = "us-east-1_kcpcLxLzn"  # prod
 
 def do_stuff():
     i = 1
-    emails = set()
     print(f"TEST IS {TEST}")
     paginationToken = None
     first = True
@@ -51,7 +50,7 @@ def do_stuff():
                 if attribute["Name"] == "email_verified":
                     email_verified = attribute["Value"]
             # continue
-            if email == None or email_verified == None:
+            if email is None or email_verified is None:
                 raise Exception(f"Email or email verified is none for {user}")
 
             if email != email.lower():
@@ -70,7 +69,7 @@ def do_stuff():
             else:
                 print(f"{i}. Email {email} is already good.")
             i += 1
-    return emails
+    return set()
 
 
 res = do_stuff()

@@ -3,6 +3,7 @@ Uploads files to S3.
 Also uploads Cloudfront Distribution accordingly.
 """
 
+
 import boto3
 import json
 import mimetypes
@@ -40,13 +41,13 @@ else:
 print("=====")
 print("Uploading to S3...")
 
-CLOUDFRONT_ORIGIN_PATH = "/{}".format(version)
-CLOUDFRONT_INDEX_PAGE_PATH = "/index.{}.html".format(version)
+CLOUDFRONT_ORIGIN_PATH = f"/{version}"
+CLOUDFRONT_INDEX_PAGE_PATH = f"/index.{version}.html"
 
 ## UPLOAD TO S3 BUCKET
 
 # Create folder
-client.put_object(Bucket=BUCKET, Body="", Key="{}/".format(version))
+client.put_object(Bucket=BUCKET, Body="", Key=f"{version}/")
 
 for root, dirs, files in os.walk(SCRIPT_PATH):
     for filename in files:
@@ -56,27 +57,24 @@ for root, dirs, files in os.walk(SCRIPT_PATH):
 
         # construct the full Dropbox path
         relative_path = os.path.relpath(local_path, SCRIPT_PATH)
-        s3_path = "{}/{}".format(
-            version, relative_path
-        )  # os.path.join(S3_DEST_PATH, relative_path)
+        s3_path = f"{version}/{relative_path}"
 
-        print('Searching "{}" in "{}"'.format(s3_path, BUCKET))
+        print(f'Searching "{s3_path}" in "{BUCKET}"')
         try:
             client.head_object(Bucket=BUCKET, Key=s3_path)
-            print("Path found on S3! Skipping {}...".format(s3_path))
+            print(f"Path found on S3! Skipping {s3_path}...")
             raise (f"Path {s3_path} found on S3! Please bump the version.")
 
-            # try:
-            #     client.delete_object(Bucket=BUCKET, Key=s3_path)
-            # except:
-            #     print("Unable to delete {}...").format(s3_path)
+                    # try:
+                    #     client.delete_object(Bucket=BUCKET, Key=s3_path)
+                    # except:
+                    #     print("Unable to delete {}...").format(s3_path)
         except:
-            print("Uploading {}...".format(s3_path))
+            print(f"Uploading {s3_path}...")
             args = {"ACL": "public-read"}
-            mimeType = mimetypes.guess_type(s3_path)[0]
-            if mimeType:
+            if mimeType := mimetypes.guess_type(s3_path)[0]:
                 args["ContentType"] = mimeType
-                print("Setting content type of {} to {}".format(s3_path, mimeType))
+                print(f"Setting content type of {s3_path} to {mimeType}")
             client.upload_file(local_path, BUCKET, s3_path, ExtraArgs=args)
 
 print("Upload to S3 complete.")
@@ -111,7 +109,7 @@ if response["Distribution"]["DistributionConfig"] != DistributionConfig:
     first_dict = response["Distribution"]["DistributionConfig"]
     diff = {k: second_dict[k] for k in set(second_dict) - set(first_dict)}
     raise Exception(
-        "Distribution config was not updated properly. Diff is {}".format(diff)
+        f"Distribution config was not updated properly. Diff is {diff}"
     )
 
 print("Cloudfront distribution config updated successfully.")

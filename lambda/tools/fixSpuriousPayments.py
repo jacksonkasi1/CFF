@@ -72,7 +72,7 @@ def fix_data():
                 assert payment_status_detail_item.method == "paypal_ipn"
                 assert payment_status_detail_item.amount == str(item.value["mc_gross"])
                 assert (
-                    payment_status_detail_item.id == None
+                    payment_status_detail_item.id is None
                     or payment_status_detail_item.id == item.value["txn_id"]
                 )
 
@@ -125,7 +125,7 @@ def fix_txn_ids():
                 assert payment_status_detail_item.method == "paypal_ipn"
                 assert payment_status_detail_item.amount == str(item.value["mc_gross"])
 
-                if payment_status_detail_item.id == None:
+                if payment_status_detail_item.id is None:
                     payment_status_detail_item.id = item.value["txn_id"]
         if not TEST:
             response.save()

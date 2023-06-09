@@ -42,8 +42,7 @@ class BaseTestCase(unittest.TestCase):
             "type": "object",
         }
         self.assertEqual(body["res"]["form"]["schema"], DEFAULT_SCHEMA)
-        formId = body["res"]["form"]["_id"]["$oid"]
-        return formId
+        return body["res"]["form"]["_id"]["$oid"]
 
     def render_form(self, formId, fail=False):
         response = self.lg.handle_request(
@@ -112,7 +111,7 @@ class BaseTestCase(unittest.TestCase):
     def view_response(self, responseId):
         response = self.lg.handle_request(
             method="GET",
-            path="/responses/{}".format(responseId),
+            path=f"/responses/{responseId}",
             headers={"authorization": "auth"},
             body="",
         )

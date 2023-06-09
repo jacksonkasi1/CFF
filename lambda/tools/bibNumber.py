@@ -52,9 +52,6 @@ for response in responses:
             BIBS[race] += 1
             print(response.id, race, BIBS[race])
             participant["bib_number"] = BIBS[race]
-        else:
-            pass
-            # print("nope", response.id, response.paid, race)
     # response.save()
 
 print(BIBS)

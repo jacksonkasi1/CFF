@@ -5,7 +5,7 @@ MODE = os.getenv("MODE", "DEV")
 USER_POOL_ID = os.getenv("USER_POOL_ID")
 COGNITO_CLIENT_ID = os.getenv("COGNITO_CLIENT_ID")
 S3_UPLOADS_BUCKET_NAME = os.getenv("S3_UPLOADS_BUCKET_NAME")
-PROD = True if MODE == "PROD" else False
+PROD = MODE == "PROD"
 
 ssm = boto3.client("ssm", "us-east-1")
 s3_client = boto3.client("s3", "us-east-1")

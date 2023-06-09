@@ -13,10 +13,8 @@ def lambda_handler(event, context):
         or event["triggerSource"] != "CustomMessage_SignUp"
     ):
         return event
+    code = event["request"]["codeParameter"]
     if event["callerContext"]["clientId"] == os.environ["CHINMAYA_ECHOES_CLIENT_ID"]:
-        code = event["request"]["codeParameter"]
-        username = event["request"]["userAttributes"]["sub"]
-
         event["response"][
             "emailSubject"
         ] = "Chinmaya Mission Account - Please verify your account"
@@ -31,11 +29,10 @@ def lambda_handler(event, context):
           Thanks,<br>
           Chinmaya Mission IT Team
           """
-        return event
     else:
-        code = event["request"]["codeParameter"]
-        username = event["request"]["userAttributes"]["sub"]
         url = os.environ["API_ENDPOINT"]
+        username = event["request"]["userAttributes"]["sub"]
+
         link = f"{url}confirmSignUp?code={code}&username={username}"
 
         event["response"][
@@ -58,4 +55,5 @@ def lambda_handler(event, context):
       Chinmaya Mission IT Team
       
       """
-        return event
+
+    return event

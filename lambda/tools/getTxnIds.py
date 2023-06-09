@@ -58,13 +58,11 @@ responses = list(responses)
 ids = set()
 ids_to_resp_ids = {}
 
-ids = set(
-    [
-        r["payment_status_detail"]["id"]
-        for r in responses
-        if "id" in r["payment_status_detail"]
-    ]
-)
+ids = {
+    r["payment_status_detail"]["id"]
+    for r in responses
+    if "id" in r["payment_status_detail"]
+}
 ids_to_resp_ids = {
     r["payment_status_detail"]["id"]: str(r["_id"])
     for r in responses
@@ -123,7 +121,7 @@ with open(os.path.join(os.path.dirname(__file__), "output.CSV"), "w+") as csvfil
     # for id in missed_ids:
     #     writer.writerow(id_to_row[id])
     for id in missed_ids:
-        print('"' + '","'.join([i for i in id_to_row[id].values()]) + '"')
+        print('"' + '","'.join(list(id_to_row[id].values())) + '"')
 
 # print(total)
 # .objects.raw({"form": ObjectId(formId), "paid": True})
