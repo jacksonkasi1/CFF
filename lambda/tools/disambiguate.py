@@ -3,6 +3,7 @@ npm run test tools.disambiguate
 
 Disambiguates center values so that they can be grouped together.
 """
+
 import os
 import dateutil.parser
 import boto3
@@ -58,4 +59,4 @@ for response in responses:
     if center != old_center:
         response.value["center"] = center
         response.save()
-        print("old: <" + old_center + ">, new: <" + center + ">")
+        print(f"old: <{old_center}>, new: <{center}>")

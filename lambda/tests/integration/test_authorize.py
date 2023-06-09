@@ -14,7 +14,7 @@ class FormAdmin(BaseTestCase):
     def test_authorize_fail(self):
         response = self.lg.handle_request(
             method="POST",
-            path=f"/authorize",
+            path="/authorize",
             headers={"Content-Type": "application/json"},
             body=json.dumps({"token": "asdasd"}),
         )

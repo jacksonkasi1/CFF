@@ -22,7 +22,7 @@ class FormSubmitAuth(BaseTestCase):
     def view(self, responseId, auth=True):
         return self.lg.handle_request(
             method="GET",
-            path="/responses/{}".format(responseId),
+            path=f"/responses/{responseId}",
             headers={"authorization": "auth" if auth else "none"},
             body="",
         )

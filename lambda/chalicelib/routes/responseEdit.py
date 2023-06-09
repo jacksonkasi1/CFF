@@ -110,8 +110,7 @@ def response_checkin(formId, responseId):
 
 
 def _parse_email_parameters(json_body):
-    email_template_id = json_body.get("emailTemplateId", None)
-    return email_template_id
+    return json_body.get("emailTemplateId", None)
 
 
 """

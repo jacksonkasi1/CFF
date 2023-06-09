@@ -15,7 +15,7 @@ BS = int(AES.block_size)
 
 
 def unpad(s):
-    return s[0 : -ord(s[-1])]
+    return s[:-ord(s[-1])]
 
 
 def encrypt(inputDict, workingKey):

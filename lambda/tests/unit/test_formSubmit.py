@@ -12,7 +12,7 @@ import mongomock
 
 class FormSubmitUtil(unittest.TestCase):
     def test_form_update(self):
-        userId = "cm:testId:" + str(uuid.uuid4())
+        userId = f"cm:testId:{str(uuid.uuid4())}"
         user = User(id=userId).save()
         paymentInfo = {
             "currency": "USD",

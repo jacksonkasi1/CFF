@@ -66,10 +66,10 @@ template = {
 }
 try:
     client.create_template(Template=template)
-    print("Created template {}.".format(template["TemplateName"]))
+    print(f'Created template {template["TemplateName"]}.')
 except client.exceptions.AlreadyExistsException:
     client.update_template(Template=template)
-    print("Updated template {}.".format(template["TemplateName"]))
+    print(f'Updated template {template["TemplateName"]}.')
 
 print("Querying all responses...")
 responses = get_all_responses(
@@ -78,9 +78,7 @@ responses = get_all_responses(
 )
 print("Got responses.")
 response = responses[0]
-EMAIL_CONTENT += "<h2>Your lookup ID: <strong>{}</strong></h2><br><br>{}".format(
-    response["responseId"][:6], display_form_dict(response["value"])
-)
+EMAIL_CONTENT += f'<h2>Your lookup ID: <strong>{response["responseId"][:6]}</strong></h2><br><br>{display_form_dict(response["value"])}'
 BODY_TEXT, BODY_HTML = email_to_html_text(EMAIL_CONTENT)
 recipient = "success@simulator.amazonses.com"
 response = client.send_bulk_templated_email(
@@ -106,4 +104,4 @@ response = client.send_bulk_templated_email(
         }
     ],
 )
-print("Sent email to {}".format(recipient))
+print(f"Sent email to {recipient}")

@@ -32,12 +32,7 @@ class CustomChalice(Chalice):
         stage = self.current_request.context.get("stage", "")
         if stage:
             stage += "/"
-        return "%s://%s/%s%s" % (
-            headers.get("x-forwarded-proto", "http"),
-            headers["host"],
-            stage,
-            path,
-        )
+        return f'{headers.get("x-forwarded-proto", "http")}://{headers["host"]}/{stage}{path}'
 
     def get_current_user_id(self):
         """Get current user id."""
@@ -54,7 +49,7 @@ class CustomChalice(Chalice):
         cff_permissions = getattr(model, "cff_permissions", {})
         current_user_perms = {}
         if id is not "cm:cognitoUserPool:anonymousUser":
-            current_user_perms.update(cff_permissions.get("cm:loggedInUser", {}))
+            current_user_perms |= cff_permissions.get("cm:loggedInUser", {})
         current_user_perms.update(cff_permissions.get(id, {}))
         return current_user_perms
 
@@ -66,9 +61,7 @@ class CustomChalice(Chalice):
         if result == False:
             id = self.get_current_user_id()
             raise UnauthorizedError(
-                "User {} is not authorized to perform action {} on this resource.".format(
-                    id, actions
-                )
+                f"User {id} is not authorized to perform action {actions} on this resource."
             )
 
     def get_org(self):
@@ -91,12 +84,12 @@ class CustomChalice(Chalice):
         actions.append("owner")
         id = self.get_current_user_id()
         current_user_perms = self.get_user_permissions(id, model)
-        if any(
-            (a in current_user_perms and current_user_perms[a] == True) for a in actions
-        ):
-            return True
-        else:
-            return False
+        return any(
+            (
+                (a in current_user_perms and current_user_perms[a] == True)
+                for a in actions
+            )
+        )
 
 
 pymodm.connection.connect(MONGO_CONN_STR)
@@ -106,9 +99,7 @@ if MODE != "PROD":
     app.debug = True
     app.log.setLevel(logging.DEBUG)
 
-# This hack allows for integration testing.
-test_user_id = os.getenv("DEV_COGNITO_IDENTITY_ID")
-if test_user_id:
+if test_user_id := os.getenv("DEV_COGNITO_IDENTITY_ID"):
     app.test_user_id = test_user_id
 
 
@@ -118,26 +109,32 @@ def iamAuthorizer(auth_request):
     {'sub': 'f31c1cb8-681c-4d3e-9749-d7c074ffd7f6', 'email_verified': True, 'iss': 'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_kcpcLxLzn', 'cognito:username': 'f31c1cb8-681c-4d3e-9749-d7c074ffd7f6', 'aud': '77mcm1k9ll2ge68806h5kncfus', 'event_id': '1dc969c8-861e-11e8-b29e-336c6c2ce302', 'token_use': 'id', 'custom:center': 'CCMT', 'auth_time': 1531432454, 'name': 'Ashwin Ramaswami', 'exp': 1532273519, 'iat': 1532269919, 'email': 'success@simulator.amazonses.com'}
     """
     claims = get_claims(auth_request.token)
-    if not claims and not app.test_user_id:
+    if claims:
+        claims["sub"] = "cm:cognitoUserPool:" + claims["sub"]
+        id = claims["sub"]
+            # try:
+            #     user = User.objects.get({"_id": id})
+            # except DoesNotExist:
+            #     print(f"User does not exist. Creating user {id}")
+            #     user = User(id=id)
+            #     user.save()
+
+    elif app.test_user_id:
+        claims = {"sub": app.test_user_id}
+        id = app.test_user_id
+            # try:
+            #     user = User.objects.get({"_id": id})
+            # except DoesNotExist:
+            #     print(f"User does not exist. Creating user {id}")
+            #     user = User(id=id)
+            #     user.save()
+
+    else:
         claims = {
             "sub": "cm:cognitoUserPool:anonymousUser",
             "name": "Anonymous",
             "email": "anonymous@chinmayamission.com",
         }
-    else:
-        if claims:
-            claims["sub"] = "cm:cognitoUserPool:" + claims["sub"]
-            id = claims["sub"]
-        elif app.test_user_id:
-            claims = {"sub": app.test_user_id}
-            id = app.test_user_id
-        # try:
-        #     user = User.objects.get({"_id": id})
-        # except DoesNotExist:
-        #     print(f"User does not exist. Creating user {id}")
-        #     user = User(id=id)
-        #     user.save()
-
     return AuthResponse(
         routes=["*"], principal_id="user", context={"id": claims["sub"]}
     )
@@ -264,8 +261,7 @@ app.route("/confirmSignUp", methods=["GET"], cors=True)(routes.confirm_sign_up)
 @app.route("/authorize", methods=["POST"], cors=True)
 def authorize():
     token = app.current_request.json_body["token"]
-    app_client_id = app.current_request.json_body.get("app_client_id", "")
-    if app_client_id:
+    if app_client_id := app.current_request.json_body.get("app_client_id", ""):
         claims = get_claims(token, verify_audience=True, app_client_id=app_client_id)
     else:
         claims = get_claims(token, verify_audience=True)

@@ -25,7 +25,7 @@ def _all(form):
             "payment_status_detail": 1,
         },
     )
-    return {"res": [r for r in json.loads(dumps(responses))]}
+    return {"res": list(json.loads(dumps(responses)))}
 
 
 def _calculate_stat(form, stat):
@@ -127,22 +127,27 @@ def _search(form, query, autocomplete, search_by_id, show_unpaid):
                         )
                     except bson.errors.InvalidId:
                         pass
-            else:
-                if field.startswith("value.participants."):
-                    _, subfield = field.split("value.participants.")
-                    mongo_query["$or"].append(
-                        {
-                            "value.participants": {
-                                "$elemMatch": {
-                                    subfield: word if exact_match else {"$regex": "^" + word, "$options": "i"}
-                                }
+            elif field.startswith("value.participants."):
+                _, subfield = field.split("value.participants.")
+                mongo_query["$or"].append(
+                    {
+                        "value.participants": {
+                            "$elemMatch": {
+                                subfield: word
+                                if exact_match
+                                else {"$regex": f"^{word}", "$options": "i"}
                             }
                         }
-                    )
-                else:
-                    mongo_query["$or"].append(
-                        {field: word if exact_match else {"$regex": "^" + word, "$options": "i"}}
-                    )
+                    }
+                )
+            else:
+                mongo_query["$or"].append(
+                    {
+                        field: word
+                        if exact_match
+                        else {"$regex": f"^{word}", "$options": "i"}
+                    }
+                )
     mongo_query["form"] = form.id
     if len(mongo_query["$or"]) == 0:
         del mongo_query["$or"]
@@ -155,9 +160,7 @@ def _search(form, query, autocomplete, search_by_id, show_unpaid):
         projection = {field: 1 for field in autocomplete_fields}
         result_limit = 5
     else:
-        projection = {}
-        for field in result_fields:
-            projection[field] = 1
+        projection = {field: 1 for field in result_fields}
     responses = (
         Response.objects.raw(mongo_query).limit(result_limit).project(projection).order_by([("date_created", pymongo.DESCENDING)])
     )
@@ -191,14 +194,14 @@ def form_response_list(formId):
     query = query_params.get("query", None)
     dataOptionViewId = query_params.get("dataOptionView", None)
     apiKey = query_params.get("apiKey", None)
-    skip_perm_check = False
-    if (
-        form.formOptions.responseListApiKey
-        and apiKey
-        and form.formOptions.responseListApiKey
-        == hashlib.sha512(apiKey.encode()).hexdigest()
-    ):
-        skip_perm_check = True
+    skip_perm_check = bool(
+        (
+            form.formOptions.responseListApiKey
+            and apiKey
+            and form.formOptions.responseListApiKey
+            == hashlib.sha512(apiKey.encode()).hexdigest()
+        )
+    )
     if dataOptionViewId:
         dataOptionViewList = filter(
             lambda x: x["id"] == dataOptionViewId, form.formOptions.dataOptions["views"]

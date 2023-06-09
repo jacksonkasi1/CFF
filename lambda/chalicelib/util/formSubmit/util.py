@@ -31,25 +31,23 @@ def parse_number_formula(data, variable, numeric=True):
     else:
         key_value_eq = None
     value = deep_access_list(data, variable.strip().split("."), key_value_eq)
-    if numeric:
-        if not value:
-            return 0
-        if type(value) is list:
-            if key_value_eq:
-                value = len(
-                    [v for v in value if str(v).strip() == key_value_eq.strip()]
-                )
-            else:
-                value = len(value)
-        if key_value_eq and type(value) is str:
-            value = value.strip() == key_value_eq.strip()
-        if isinstance(value, bool):
-            value = 1 if value is True else 0
-        if not isinstance(value, (int, float)):
-            return copy.deepcopy(value) or 0
-        return float(value)
-    else:
+    if not numeric:
         return copy.deepcopy(value) or 0
+    if not value:
+        return 0
+    if type(value) is list:
+        value = (
+            len([v for v in value if str(v).strip() == key_value_eq.strip()])
+            if key_value_eq
+            else len(value)
+        )
+    if key_value_eq and type(value) is str:
+        value = value.strip() == key_value_eq.strip()
+    if isinstance(value, bool):
+        value = 1 if value is True else 0
+    if not isinstance(value, (int, float)):
+        return copy.deepcopy(value) or 0
+    return float(value)
 
 
 def dict_array_to_sum_dict(original, key_value_eq=None):
@@ -135,9 +133,7 @@ def calculate_price(expressionString, data, numeric=True, responseMetadata={}):
         expressionString = expressionString.replace(variable, escapedVariable)
     context = dict(context, **create_default_context(numeric, responseMetadata))
     price = parser.parse(expressionString).evaluate(context)
-    if not numeric:
-        return price
-    return ceil(float(price) * 100) / 100
+    return price if not numeric else ceil(float(price) * 100) / 100
 
 
 def format_payment(total, currency="USD"):
@@ -175,7 +171,7 @@ def human_readable_key(key, delimiter=":"):
     delimiter = re.escape(delimiter)
     key = re.sub(
         r"s?{0}(\d+){0}?".format(delimiter),
-        lambda x: " " + str(int(x.group(1)) + 1) + " ",
+        lambda x: f" {str(int(x.group(1)) + 1)} ",
         key,
     )
     key = re.sub(delimiter, ": ", key)
@@ -187,18 +183,17 @@ def dict_to_table(dct, options={}, human_readable=True):
     flat = flatdict.FlatterDict(dct)
     columnOrder = options.get("columnOrder", [])
     table = "<table>"
-    remainingColumns = set(v for v in flat.keys())
+    remainingColumns = set(flat.keys())
     newColumns = []
     for columnOrderItem in columnOrder:
         columnOrderItem = (
             columnOrderItem.replace("]", ":").replace("[", ":").replace(".", ":")
         )
-        possibleColumns = [
+        if possibleColumns := [
             v
             for v in remainingColumns
-            if v == columnOrderItem or v.startswith(columnOrderItem + ":")
-        ]
-        if len(possibleColumns) > 0:
+            if v == columnOrderItem or v.startswith(f"{columnOrderItem}:")
+        ]:
             newColumns += sorted(possibleColumns)
             remainingColumns -= set(possibleColumns)
     if len(newColumns) == 0:
@@ -207,7 +202,7 @@ def dict_to_table(dct, options={}, human_readable=True):
         value = flat[key]
         if human_readable:
             key = human_readable_key(key)
-        table += "<tr><th>{}</th><td>{}</td></tr>".format(key, value)
+        table += f"<tr><th>{key}</th><td>{value}</td></tr>"
     table += "</table>"
     return table
 

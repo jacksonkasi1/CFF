@@ -49,7 +49,7 @@ def fix_data():
                     content_type = re.findall("^data:([^;]+);", image)[0]
                     content = re.sub("^.*?base64,", "", image)
                     name = hashlib.md5(image.encode("utf-8")).hexdigest()
-                    print("Base 64 image " + name)
+                    print(f"Base 64 image {name}")
                     s3_client.put_object(
                         Bucket="cff-uploads-prod",
                         Body=base64.b64decode(content),

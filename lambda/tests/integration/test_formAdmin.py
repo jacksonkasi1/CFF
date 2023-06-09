@@ -31,7 +31,7 @@ class FormAdmin(BaseTestCase):
         self.assertEqual(response["statusCode"], 200, response)
         body = json.loads(response["body"])
         self.assertEqual(
-            set(("_id", "name", "cff_permissions", "date_created", "date_modified")),
+            {"_id", "name", "cff_permissions", "date_created", "date_modified"},
             set(body["res"][0].keys()),
         )
         found_form = [i for i in body["res"] if i["_id"]["$oid"] == formId]
@@ -40,7 +40,7 @@ class FormAdmin(BaseTestCase):
     def test_form_list_none(self):
         """When user can access no forms."""
         test_id_old = app.test_user_id
-        app.test_user_id = "cm:cognitoUserPool:" + str(uuid.uuid4())
+        app.test_user_id = f"cm:cognitoUserPool:{str(uuid.uuid4())}"
         response = self.lg.handle_request(
             method="GET", path="/forms", headers={"authorization": "auth"}, body=""
         )
@@ -72,7 +72,7 @@ class FormAdmin(BaseTestCase):
         """When user can access all forms due to being owner of an org."""
         formId = self.create_form()
         test_id_old = app.test_user_id
-        app.test_user_id = "cm:cognitoUserPool:" + str(uuid.uuid4())
+        app.test_user_id = f"cm:cognitoUserPool:{str(uuid.uuid4())}"
         response = self.lg.handle_request(
             method="GET", path="/forms", headers={"authorization": "auth"}, body=""
         )

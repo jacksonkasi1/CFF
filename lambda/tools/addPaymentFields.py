@@ -2,6 +2,7 @@
 npm test -- tools.addPaymentFields
 Add amount_owed_cents and amount_paid_cents to all fields.
 """
+
 import os
 
 os.environ["AWS_PROFILE"] = "default"
@@ -39,13 +40,12 @@ responses = Response.objects.raw({})
 for response in responses:
     modified = False
     paymentInfo = response.paymentInfo
-    amount_paid = response.amount_paid
     if paymentInfo and "total" in paymentInfo:
         modified = True
         response.amount_owed_cents = int(100 * paymentInfo["total"])
-    if amount_paid:
+    if amount_paid := response.amount_paid:
         modified = True
         response.amount_paid_cents = int(100 * float(amount_paid))
     if modified:
         response.save()
-        print("modified response " + str(response.id))
+        print(f"modified response {str(response.id)}")

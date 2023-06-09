@@ -49,8 +49,7 @@ def fill_string_from_template(response, templateText):
     kwargs = dict(serialize_model(response), response=flat)
     if kwargs.get("modify_link", None):
         kwargs["view_link"] = kwargs["modify_link"] + "&mode=view"
-    msgBody = env.from_string(templateText).render(**kwargs)
-    return msgBody
+    return env.from_string(templateText).render(**kwargs)
 
 
 def create_confirmation_email_dict(response, confirmationEmailInfo):
@@ -69,10 +68,10 @@ def create_confirmation_email_dict(response, confirmationEmailInfo):
     to = confirmationEmailInfo.get("to", [])
     if type(to) is not list:
         to = [to]
-    
-    toEmails = [get(response.value, i) for i in toField] + [i for i in to]
+
+    toEmails = [get(response.value, i) for i in toField] + list(to)
     toEmails = [email for email in toEmails if email]
-    
+
     # pre-process attachment templates
     attachments = [
         {
@@ -84,9 +83,11 @@ def create_confirmation_email_dict(response, confirmationEmailInfo):
         for item in confirmationEmailInfo.get("attachments", [])
     ]
 
-    emailOptions = dict(
+    return dict(
         toEmail=toEmails,
-        fromEmail=confirmationEmailInfo.get("from", "webmaster@chinmayamission.com"),
+        fromEmail=confirmationEmailInfo.get(
+            "from", "webmaster@chinmayamission.com"
+        ),
         fromName=confirmationEmailInfo.get("fromName", "Webmaster"),
         subject=confirmationEmailInfo.get("subject", "Confirmation Email"),
         bccEmail=confirmationEmailInfo.get("bcc", ""),
@@ -95,7 +96,6 @@ def create_confirmation_email_dict(response, confirmationEmailInfo):
         msgBody=msgBody,
         attachments=attachments,
     )
-    return emailOptions
 
 
 def email_to_html_text(msgBody):
@@ -174,12 +174,9 @@ def send_email(
         server.login(SMTP_USERNAME, SMTP_PASSWORD)
         server.send_message(msg)
         server.close()
-    # Display an error if something goes wrong.
     except Exception as e:
-        print("Error sending email to {}.".format(toEmail))
+        print(f"Error sending email to {toEmail}.")
         raise e
-    else:
-        pass
 
 
 def send_confirmation_email(response, confirmationEmailInfo):

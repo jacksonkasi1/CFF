@@ -21,7 +21,7 @@ def form_create():
         formId = request_body.get("formId", None)
         old_form = Form.objects.get({"_id": ObjectId(formId)})
         form = Form(
-            name=old_form.name + " Copy - " + datetime.datetime.now().isoformat(),
+            name=f"{old_form.name} Copy - {datetime.datetime.now().isoformat()}",
             version=1,
             center="None",
             id=ObjectId(),
@@ -32,11 +32,9 @@ def form_create():
             date_modified=datetime.datetime.now().isoformat(),
             date_created=datetime.datetime.now().isoformat(),
         )
-        form.save()
-        return {"res": {"form": serialize_model(form)}}
     else:
         form_name = request_body.get(
-            "form_name", "Untitled form {}".format(datetime.datetime.now().isoformat())
+            "form_name", f"Untitled form {datetime.datetime.now().isoformat()}"
         )
         form = Form(
             name=form_name,
@@ -60,5 +58,6 @@ def form_create():
             date_modified=datetime.datetime.now().isoformat(),
             date_created=datetime.datetime.now().isoformat(),
         )
-        form.save()
-        return {"res": {"form": serialize_model(form)}}
+
+    form.save()
+    return {"res": {"form": serialize_model(form)}}

@@ -220,7 +220,7 @@ class FormSubmit(BaseTestCase):
         response = self.view_response(responseId)
         self.assertEqual(response["value"], ONE_FORMDATA)
         self.assertEqual(response["paid"], False)
-        self.assertTrue(response.get("user", None) == None)
+        self.assertTrue(response.get("user", None) is None)
 
         expected_data = copy.deepcopy(ONE_FORMDATA)
         set_(expected_data, "contact_name.last", "NEW_LAST2")
@@ -247,7 +247,7 @@ class FormSubmit(BaseTestCase):
         response = self.view_response(responseId)
         self.assertEqual(response["value"], ONE_FORMDATA)
         self.assertEqual(response["paid"], False)
-        self.assertTrue(response.get("user", None) == None)
+        self.assertTrue(response.get("user", None) is None)
 
         # Pay response.
         response = Response.objects.get({"_id": ObjectId(responseId)})
